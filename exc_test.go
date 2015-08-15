@@ -13,4 +13,5 @@ func TestExecHere2(t *testing.T) {
 
 	fmt.Println(string(retbs))
 
+	NewCMD("git add -A").Debug().Env("GOPATH").Cd("src/github.com/everfore/exc").Wd().Execute()
 }

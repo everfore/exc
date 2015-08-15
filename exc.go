@@ -47,6 +47,14 @@ func (c *CMD) Env(key string) *CMD {
 	return c.Cd(os.Getenv(key))
 }
 
+func (c *CMD) Wd() *CMD {
+	dir, err := os.Getwd()
+	if !Checkerr(err) {
+		fmt.Printf("=======[ %s ]======\n", dir)
+	}
+	return c
+}
+
 func (c *CMD) Reset(cmd string) *CMD {
 	c.raw = cmd
 	args := strings.Split(cmd, " ")
@@ -61,6 +69,7 @@ func (c *CMD) Reset(cmd string) *CMD {
 }
 
 func (c *CMD) Do() ([]byte, error) {
+	fmt.Printf("[cmd] %s\n", c.raw)
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf("raw cmd is nil")
 	}
@@ -91,12 +100,25 @@ func (c *CMD) Out(ret *[]byte, reterr *error) *CMD {
 	return c
 }
 
+func (c *CMD) Tmp(cmd string) *CMD {
+	fmt.Printf("[Tmp cmd] %s\n", cmd)
+	var excmd *exec.Cmd
+	args := strings.Split(cmd, " ")
+	args_len := len(args)
+	if args_len > 1 {
+		excmd = exec.Command(args[0], args[1:]...)
+	} else {
+		excmd = exec.Command(cmd)
+	}
+	bs, _ := excmd.CombinedOutput()
+	fmt.Println(*(*string)(unsafe.Pointer(&bs)))
+	return c
+}
+
 func DefaultExecution(cmd string, args ...string) ([]byte, error) {
-	fmt.Printf("%s", cmd)
 	var excmd *exec.Cmd
 	if len(args) > 0 {
 		excmd = exec.Command(cmd, args...)
-		fmt.Printf(" %v\n", args)
 	} else {
 		excmd = exec.Command(cmd)
 	}
