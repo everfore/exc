@@ -69,7 +69,9 @@ func (c *CMD) Reset(cmd string) *CMD {
 }
 
 func (c *CMD) Do() ([]byte, error) {
-	fmt.Printf("[cmd] %s\n", c.raw)
+	if c.debug {
+		fmt.Printf("[cmd] %s\n", c.raw)
+	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf("raw cmd is nil")
 	}
