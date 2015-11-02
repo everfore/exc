@@ -3,6 +3,7 @@ package exc
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestExecHere2(t *testing.T) {
@@ -14,4 +15,16 @@ func TestExecHere2(t *testing.T) {
 	fmt.Println(string(retbs))
 
 	NewCMD("git push origin master").Debug().Env("GOPATH").Cd("src/github.com/everfore/exc").Wd().Execute()
+}
+
+func TestExecHere3(t *testing.T) {
+	bs, err := NewCMD("ping www.baidu.com").Debug().Env("GOPATH").Do() //.Cd("src").Reset("go version").Out(&retbs, nil).Do()
+	fmt.Println(string(bs), err)
+	time.Sleep(8e9)
+}
+
+func TestExecHere4(t *testing.T) {
+	bs, _ := NewCMD("go -L").Env("GOPATH").Do()
+	fmt.Println(string(bs))
+	// Checkerr(err)
 }

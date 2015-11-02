@@ -5,7 +5,9 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
+	"time"
 	"unsafe"
 )
 
@@ -75,15 +77,30 @@ func (c *CMD) Do() ([]byte, error) {
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf("raw cmd is nil")
 	}
+	var err error
 	if c.Execution != nil {
-		bs, err := c.Execution(c.cmd, c.args...)
-		Checkerr(err)
-		if c.debug {
-			fmt.Println(*(*string)(unsafe.Pointer(&bs)))
+		var bs []byte
+		sh := make(chan bool)
+		go func() {
+			go func() {
+				<-time.After(4e9)
+				runtime.Goexit()
+			}()
+			bs, err = c.Execution(c.cmd, c.args...)
+			sh <- true
+		}()
+		select {
+		case <-sh:
+			Checkerr(err)
+			if c.debug {
+				fmt.Println(*(*string)(unsafe.Pointer(&bs)))
+			}
+			return bs, err
+		case <-time.After(4e9):
+			err = fmt.Errorf("Timeout")
 		}
-		return bs, err
 	}
-	return nil, nil
+	return nil, err
 }
 
 func (c *CMD) Execute() *CMD {
