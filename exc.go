@@ -108,6 +108,12 @@ func (c *CMD) Execute() *CMD {
 	return c
 }
 
+func (c *CMD) ExecuteAfter(sec int) *CMD {
+	<-time.After(time.Second * (time.Duration)(sec))
+	c.Do()
+	return c
+}
+
 func (c *CMD) Out(ret *[]byte, reterr *error) *CMD {
 	b, err := c.Do()
 	if ret != nil {

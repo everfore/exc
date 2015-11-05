@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+func TestExcAfter(t *testing.T) {
+	NewCMD("go version").Debug().ExecuteAfter(4)
+}
+
 func TestExecHere2(t *testing.T) {
 	var retbs []byte
 	bs, err := NewCMD("go env").Debug().Env("GOPATH").Execute().Cd("src").Reset("go version").Out(&retbs, nil).Do()
