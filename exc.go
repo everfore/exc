@@ -83,7 +83,7 @@ func (c *CMD) Do() ([]byte, error) {
 		sh := make(chan bool)
 		go func() {
 			go func() {
-				<-time.After(4e9)
+				<-time.After(8e9)
 				runtime.Goexit()
 			}()
 			bs, err = c.Execution(c.cmd, c.args...)
@@ -96,7 +96,7 @@ func (c *CMD) Do() ([]byte, error) {
 				fmt.Println(*(*string)(unsafe.Pointer(&bs)))
 			}
 			return bs, err
-		case <-time.After(4e9):
+		case <-time.After(8e9):
 			err = fmt.Errorf("Timeout")
 		}
 	}
