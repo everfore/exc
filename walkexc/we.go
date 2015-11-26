@@ -59,10 +59,15 @@ func WalkExc(path string, info os.FileInfo, err error) error {
 	if ignore, skip := CondFunc(path, info); skip != nil || ignore {
 		return skip
 	}
+	return PathExc(path, command...)
+}
+
+func PathExc(path string, c ...string) error {
 	abs, _ := filepath.Abs(path)
 	fmt.Println("cur path:", abs)
 	cmd := setCmd(command...)
-	cmd.Dir = filepath.Clean(path)
+	// cmd.Dir = filepath.Clean(path)
+	cmd.Dir = abs
 	bs, _ := cmd.CombinedOutput()
 	fmt.Println(string(bs))
 	return nil
