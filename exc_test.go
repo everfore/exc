@@ -32,3 +32,7 @@ func TestExecHere4(t *testing.T) {
 	fmt.Println(string(bs))
 	// Checkerr(err)
 }
+
+func TestDoNoTime(t *testing.T) {
+	NewCMD("go version").Debug().DoNoTime()
+}

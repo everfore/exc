@@ -70,6 +70,19 @@ func (c *CMD) Reset(cmd string) *CMD {
 	return c
 }
 
+func (c *CMD) DoNoTime() ([]byte, error) {
+	if c.debug {
+		fmt.Printf("[cmd] %s\n", c.raw)
+	}
+	if len(c.raw) <= 0 {
+		return nil, fmt.Errorf("raw cmd is nil")
+	}
+	if c.Execution != nil {
+		return c.Execution(c.cmd, c.args...)
+	}
+	return nil, nil
+}
+
 func (c *CMD) Do() ([]byte, error) {
 	if c.debug {
 		fmt.Printf("[cmd] %s\n", c.raw)
