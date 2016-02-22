@@ -117,7 +117,7 @@ func (c *CMD) Do() ([]byte, error) {
 }
 
 func (c *CMD) Execute() *CMD {
-	c.Do()
+	c.DoNoTime()
 	return c
 }
 
