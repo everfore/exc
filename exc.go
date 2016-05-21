@@ -117,7 +117,10 @@ func (c *CMD) Do() ([]byte, error) {
 }
 
 func (c *CMD) Execute() *CMD {
-	c.DoNoTime()
+	bs, _ := c.DoNoTime()
+	if c.debug {
+		fmt.Println(*(*string)(unsafe.Pointer(&bs)))
+	}
 	return c
 }
 
