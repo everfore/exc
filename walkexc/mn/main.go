@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/everfore/exc/walkexc"
-	"github.com/shaalx/goutils"
+	"github.com/toukii/goutils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,24 +12,23 @@ import (
 )
 
 func main() {
-	walkexc.Setting(Cond, "git", "push")
+	walkexc.Setting(Cond, "go", "version")
 	filepath.Walk("./", walkexc.WalkExc)
 }
 
-func Cond(path string, info os.FileInfo) (ignore bool, skip error) {
+func Cond(path string, info os.FileInfo) (ifExec bool, skip error) {
 	if strings.EqualFold(info.Name(), ".git") {
-		return true, filepath.SkipDir
+		return false, filepath.SkipDir
 	}
 	if !info.IsDir() {
 		if strings.HasSuffix(info.Name(), ".go") || strings.HasSuffix(info.Name(), "Dockerfile") {
-			fmt.Println(info.Name())
 			if bs, cnt := ContentContains(path, "toukii"); cnt {
+				fmt.Println(info.Name())
 				rst_cnt := strings.Replace(goutils.ToString(bs), "toukii", "toukii", -1)
-				fmt.Println(rst_cnt)
 				OverWrite(path, goutils.ToByte(rst_cnt))
+				return true, nil
 			}
 		}
-		return true, nil
 	}
 	return false, nil
 }
