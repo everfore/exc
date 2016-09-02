@@ -1,11 +1,14 @@
 package main
 
-import(
-"github.com/everfore/exc/walkexc"
-"path/filepath"
-"fmt"
-"os"
-"strings"
+import (
+	"fmt"
+	"github.com/everfore/exc/walkexc"
+	"github.com/shaalx/goutils"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+	// "bufio"
 )
 
 func main() {
@@ -13,16 +16,50 @@ func main() {
 	filepath.Walk("../", walkexc.WalkExc)
 }
 
-func Cond(path string, info os.FileInfo) (ignore bool, skip error){
+func Cond(path string, info os.FileInfo) (ignore bool, skip error) {
 	if strings.EqualFold(info.Name(), ".git") {
 		return true, filepath.SkipDir
 	}
 	if !info.IsDir() {
-		fmt.Println(info.Name())
-		if strings.HasSuffix(info.Name(),".go") {
-			
+		if strings.HasSuffix(info.Name(), ".go") {
+			fmt.Println(info.Name())
+			if bs, cnt := ContentContains(path, "shaalx"); cnt {
+				rst_cnt := strings.Replace(goutils.ToString(bs), "shaalx", "toukii", -1)
+				fmt.Println(rst_cnt)
+				OverWrite(path, goutils.ToByte(rst_cnt))
+			}
 		}
 		return true, nil
 	}
 	return false, nil
+}
+
+func ContentContains(path string, stuff string) ([]byte, bool) {
+	abs_path, err := filepath.Abs(path)
+	if goutils.CheckErr(err) {
+		return nil, false
+	}
+	fr, err := os.OpenFile(abs_path, os.O_RDONLY, 0644)
+	defer fr.Close()
+	if goutils.CheckErr(err) {
+		return nil, false
+	}
+	bs, err := ioutil.ReadAll(fr)
+	if goutils.CheckErr(err) {
+		return nil, false
+	}
+	if strings.Contains(goutils.ToString(bs), stuff) {
+		return bs, true
+	}
+	return nil, false
+}
+
+func OverWrite(path string, bs []byte) {
+	// wf, err := os.OpenFile(path, os.O_WRONLY, 0655)
+	// defer wf.Close()
+	// if goutils.CheckErr(err) {
+	// 	return
+	// }
+	err := ioutil.WriteFile(path, bs, 0655)
+	goutils.CheckErr(err)
 }
