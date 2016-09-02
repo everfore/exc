@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	walkexc.Setting(Cond, "go", "version")
+	walkexc.Setting(Cond, "push")
 	filepath.Walk("./", walkexc.WalkExc)
 }
 
@@ -22,9 +22,9 @@ func Cond(path string, info os.FileInfo) (ifExec bool, skip error) {
 	}
 	if !info.IsDir() {
 		if strings.HasSuffix(info.Name(), ".go") || strings.HasSuffix(info.Name(), "Dockerfile") {
-			if bs, cnt := ContentContains(path, "toukii"); cnt {
+			if bs, cnt := ContentContains(path, "shaalx"); cnt {
 				fmt.Println(info.Name())
-				rst_cnt := strings.Replace(goutils.ToString(bs), "toukii", "toukii", -1)
+				rst_cnt := strings.Replace(goutils.ToString(bs), "shaalx", "toukii", -1)
 				OverWrite(path, goutils.ToByte(rst_cnt))
 				return true, nil
 			}
