@@ -3,7 +3,7 @@ package walkexc
 import (
 	"path/filepath"
 	"testing"
-	// "shaalx"
+	// "toukii"
 )
 
 func TestSample(t *testing.T) {
