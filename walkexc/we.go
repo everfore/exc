@@ -1,7 +1,7 @@
 package walkexc
 
 import (
-	"fmt"
+	// "fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -73,10 +73,11 @@ func WalkExc(path string, info os.FileInfo, err error) error {
 
 func PathExc(path string, c ...string) error {
 	abs, _ := filepath.Abs(path)
-	fmt.Println("cur path:", abs, c)
+	// fmt.Println("cur path:", abs, c)
 	cmd := setCmd(c...)
 	cmd.Dir = abs
-	bs, _ := cmd.CombinedOutput()
-	fmt.Println(string(bs))
+	// bs, _ := cmd.CombinedOutput()
+	// fmt.Println(string(bs))
+	cmd.CombinedOutput()
 	return nil
 }
