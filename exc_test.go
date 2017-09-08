@@ -36,3 +36,7 @@ func TestExecHere4(t *testing.T) {
 func TestDoNoTime(t *testing.T) {
 	NewCMD("go version").Debug().DoNoTime()
 }
+
+func TestBash(t *testing.T) {
+	NewCMD("cat exc.go | grep cmd | wc -l").Debug().Execute()
+}

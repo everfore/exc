@@ -32,6 +32,20 @@ func NewCMD(cmd string) *CMD {
 	return newCMD
 }
 
+// func Bash(cmd string) *CMD {
+// 	newCMD := &CMD{raw: cmd, Execution: DefaultExecution}
+// 	exec.Command("bash", "-c", cmd)
+// 	args := strings.Split(cmd, " ")
+// 	args_len := len(args)
+// 	if args_len > 1 {
+// 		newCMD.cmd = args[0]
+// 		newCMD.args = args[1:]
+// 	} else {
+// 		newCMD.cmd = cmd
+// 	}
+// 	return newCMD
+// }
+
 func (c *CMD) Debug() *CMD {
 	c.debug = !c.debug
 	return c

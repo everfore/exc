@@ -1,7 +1,7 @@
 package walkexc
 
 import (
-	// "fmt"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -30,7 +30,7 @@ func Setting(cond func(path string, info os.FileInfo) (ignore bool, skip error),
 	}
 }
 
-func setCmd(c ...string) *exec.Cmd {
+func SetCmd(c ...string) *exec.Cmd {
 	locker.Lock()
 	defer locker.Unlock()
 	leng := len(c)
@@ -46,6 +46,7 @@ func setCmd(c ...string) *exec.Cmd {
 }
 
 func DefaultCond(path string, info os.FileInfo) (ifExec bool, skip error) {
+	fmt.Println(info)
 	if strings.EqualFold(info.Name(), ".git") {
 		return false, filepath.SkipDir
 	}
@@ -56,6 +57,9 @@ func DefaultCond(path string, info os.FileInfo) (ifExec bool, skip error) {
 }
 
 func WalkExc(path string, info os.FileInfo, err error) error {
+	if info == nil {
+		return nil
+	}
 	ifExec, skip := CondFunc(path, info)
 	if skip != nil {
 		return skip
@@ -73,11 +77,13 @@ func WalkExc(path string, info os.FileInfo, err error) error {
 
 func PathExc(path string, c ...string) error {
 	abs, _ := filepath.Abs(path)
-	// fmt.Println("cur path:", abs, c)
-	cmd := setCmd(c...)
+	fmt.Println("cur path:", abs, c)
+	cmd := SetCmd(c...)
 	cmd.Dir = abs
+	bs, err := cmd.Output()
+	fmt.Println(string(bs), err)
 	// bs, _ := cmd.CombinedOutput()
 	// fmt.Println(string(bs))
-	cmd.CombinedOutput()
+	// cmd.CombinedOutput()
 	return nil
 }
