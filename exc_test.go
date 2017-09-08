@@ -38,5 +38,8 @@ func TestDoNoTime(t *testing.T) {
 }
 
 func TestBash(t *testing.T) {
-	NewCMD("cat exc.go | grep cmd | wc -l").Debug().Execute()
+	bs, err := Bash("cat exc.go | grep cmd | wc -l").DoNoTime()
+	t.Log(string(bs), err)
+	Bash("cat exc.go | grep cmd | wc").Debug().ExecuteAfter(1).Out(&bs, &err)
+	t.Log(string(bs), err)
 }
