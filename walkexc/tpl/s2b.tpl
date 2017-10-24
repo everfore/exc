@@ -7,6 +7,10 @@
 	{{end}}
 {{end}}
 
-{{range $k,$v := .Arr}}
-	hello, {{$k}}:{{$v}}!
+{{range $i,$v := .Arr}}
+	arr[{{$i}}]:{{$v}}!
+{{end}}
+
+{{with .Arr}}
+	arrs: {{join . ","}}
 {{end}}
