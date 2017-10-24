@@ -54,13 +54,13 @@ func main() {
 	}
 
 	if *excute {
-		buf := make([]byte, 10, 100)
+		buf := make([]byte, 20, 10240)
 		wr := qiniubytes.NewWriter(buf)
 		err := Render(wr, *tplFile, data)
 		if goutils.LogCheckErr(err) {
 			os.Exit(-1)
 		}
-
+		// fmt.Fprintf(os.Stdout, "%s", wr.Bytes())
 		exc.Bash(goutils.ToString(wr.Bytes())).Debug().Execute()
 	} else {
 		goutils.LogCheckErr(Render(os.Stdout, *tplFile, data))
