@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/toukii/goutils"
@@ -48,21 +49,22 @@ func main() {
 
 	err = Render(*tplFile, data)
 	goutils.LogCheckErr(err)
-	// if len(data.Map) > 0 {
-	// 	err := Render(*tplFile, data.Map)
-	// 	goutils.LogCheckErr(err)
-	// }
-	// if len(data.Arr) > 0 {
-	// 	err := Render(*tplFile, data.Arr)
-	// 	goutils.LogCheckErr(err)
-	// }
 
 }
 
 func Render(tplFile string, data interface{}) error {
-	tpl := template.New(tplFile).Funcs(template.FuncMap{"test": func(arg int) string {
-		return fmt.Sprintf("TEST call %d", arg)
-	}})
+	tpl := template.New(tplFile).Funcs(template.FuncMap{
+		"test": func(arg int) string {
+			return fmt.Sprintf("TEST call %d", arg)
+		},
+		"join": func(ids []interface{}, sep string) string {
+			idsStr := make([]string, len(ids))
+			for i, id := range ids {
+				idsStr[i] = fmt.Sprint(id)
+			}
+			return strings.Join(idsStr, sep)
+		},
+	})
 	tpl, err := tpl.ParseFiles(tplFile)
 	if err != nil {
 		return err
