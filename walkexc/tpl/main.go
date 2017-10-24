@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	tplFile  = kingpin.Arg("tpl", "template file").String()
+	tplFile  = kingpin.Arg("tpl", "template file").Default("s2b.tpl").String()
 	dataFile = kingpin.Arg("data", "render data file").Default("data.yaml").String()
 
 	// gob = kingpin.Flag("pkg", "go build pkg").Short('p').String()
