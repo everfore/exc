@@ -76,7 +76,7 @@ func (c *CMD) Reset(cmd string) *CMD {
 
 func (c *CMD) DoNoTime() ([]byte, error) {
 	if c.debug {
-		fmt.Printf("[cmd] %s\n", c.raw)
+		fmt.Printf("\n## cmd:\n%s", c.raw)
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf("raw cmd is nil")
@@ -89,7 +89,7 @@ func (c *CMD) DoNoTime() ([]byte, error) {
 
 func (c *CMD) Do() ([]byte, error) {
 	if c.debug {
-		fmt.Printf("[cmd] %s\n", c.raw)
+		fmt.Printf("\n## cmd:\n%s", c.raw)
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf("raw cmd is nil")
@@ -121,9 +121,12 @@ func (c *CMD) Do() ([]byte, error) {
 }
 
 func (c *CMD) Execute() *CMD {
-	bs, _ := c.DoNoTime()
+	bs, err := c.DoNoTime()
+	if err != nil {
+		fmt.Println("\n## execute err:", err)
+	}
 	if c.debug {
-		fmt.Println(*(*string)(unsafe.Pointer(&bs)))
+		fmt.Printf("\n## execute output:\n%s", *(*string)(unsafe.Pointer(&bs)))
 	}
 	return c
 }

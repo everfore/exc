@@ -8,7 +8,7 @@ import (
 	"text/template"
 
 	"github.com/everfore/exc"
-	qiniubytes "github.com/qiniu/bytes"
+	qiniubytes "github.com/toukii/bytes"
 	"github.com/toukii/goutils"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -54,18 +54,14 @@ func main() {
 	}
 
 	if *excute {
-		buf := make([]byte, 10240)
+		buf := make([]byte, 10, 100)
 		wr := qiniubytes.NewWriter(buf)
 		err := Render(wr, *tplFile, data)
 		if goutils.LogCheckErr(err) {
 			os.Exit(-1)
 		}
-		rst := wr.Bytes()
-		erst, err := exc.Bash(goutils.ToString(rst)).Debug().DoNoTime()
-		if goutils.LogCheckErr(err) {
-			os.Exit(-1)
-		}
-		fmt.Printf("[excute result:]\n%s", erst)
+
+		exc.Bash(goutils.ToString(wr.Bytes())).Debug().Execute()
 	} else {
 		goutils.LogCheckErr(Render(os.Stdout, *tplFile, data))
 	}
