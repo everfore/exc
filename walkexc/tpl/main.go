@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/template"
 
+	"github.com/everfore/exc"
+	qiniubytes "github.com/qiniu/bytes"
 	"github.com/toukii/goutils"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -15,6 +18,7 @@ import (
 var (
 	tplFile  = kingpin.Arg("tpl", "template file").Default("s2b.tpl").String()
 	dataFile = kingpin.Arg("data", "render data file").Default("data.yaml").String()
+	excute   = kingpin.Flag("excute", "excute command: the output").Short('E').Bool()
 
 	// gob = kingpin.Flag("pkg", "go build pkg").Short('p').String()
 	// status          = kingpin.Command("status", "Check lock status")
@@ -23,11 +27,13 @@ var (
 	// releaseID       = release_with_id.Arg("id", "session ID to release").Required().String()
 )
 
+// Data tpl data
 type Data struct {
 	Map map[string]interface{} `yaml:"map"`
 	Arr []interface{}          `yaml:"arr"`
 }
 
+// Test
 func Test(arg int) string {
 	return fmt.Sprintf("TEST call %d", arg)
 }
@@ -47,12 +53,26 @@ func main() {
 		os.Exit(-1)
 	}
 
-	err = Render(*tplFile, data)
-	goutils.LogCheckErr(err)
-
+	if *excute {
+		buf := make([]byte, 10240)
+		wr := qiniubytes.NewWriter(buf)
+		err := Render(wr, *tplFile, data)
+		if goutils.LogCheckErr(err) {
+			os.Exit(-1)
+		}
+		rst := wr.Bytes()
+		erst, err := exc.Bash(goutils.ToString(rst)).Debug().DoNoTime()
+		if goutils.LogCheckErr(err) {
+			os.Exit(-1)
+		}
+		fmt.Printf("[excute result:]\n%s", erst)
+	} else {
+		goutils.LogCheckErr(Render(os.Stdout, *tplFile, data))
+	}
 }
 
-func Render(tplFile string, data interface{}) error {
+// Render
+func Render(wr io.Writer, tplFile string, data interface{}) error {
 	tpl := template.New(tplFile).Funcs(template.FuncMap{
 		"test": func(arg int) string {
 			return fmt.Sprintf("TEST call %d", arg)
@@ -69,6 +89,5 @@ func Render(tplFile string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = tpl.ExecuteTemplate(os.Stdout, tplFile, data)
-	return err
+	return tpl.ExecuteTemplate(wr, tplFile, data)
 }
