@@ -1,0 +1,15 @@
+arr:
+  - 1001
+  - 1002
+  - 1003
+  - 1004
+map:
+  update:
+    id: 1001
+    name: John
+    age: 24
+  search:
+    ids:
+      - 1001
+      - 1002
+      - 1004
