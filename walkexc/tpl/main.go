@@ -18,7 +18,7 @@ import (
 var (
 	tplFile  = kingpin.Arg("tpl", "template file").Default("s2b.tpl").String()
 	dataFile = kingpin.Arg("data", "render data file").Default("data.yaml").String()
-	excute   = kingpin.Flag("excute", "excute command: the output").Short('E').Bool()
+	excute   = kingpin.Flag("execute", "excute command: the output").Short('E').Bool()
 
 	// gob = kingpin.Flag("pkg", "go build pkg").Short('p').String()
 	// status          = kingpin.Command("status", "Check lock status")
