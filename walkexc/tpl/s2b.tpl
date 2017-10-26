@@ -1,3 +1,4 @@
+
 echo {{test 2}}
 
 {{range $k,$v := .Map}}
@@ -21,3 +22,15 @@ echo ...===123456
 echo {{join . "_"}}_
 {{end}}
 echo 123
+
+{{loop 1 10 1}}
+{{loop 1 10 2}}
+{{loop 1 10 3}}
+{{loop 1 10 0}}
+{{loop 1 0 0}}
+{{loop -1 10 2}}
+{{loop -1 -10 2}}
+
+{{range $i:=loop 1 10 2}}
+	{{$i}}th
+{{end}}

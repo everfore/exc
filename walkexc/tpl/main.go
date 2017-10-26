@@ -80,6 +80,19 @@ func Render(wr io.Writer, tplFile string, data interface{}) error {
 			}
 			return strings.Join(idsStr, sep)
 		},
+		"loop": func(start, end, step int) []int {
+			if step <= 0 || start > end {
+				return nil
+			}
+			loop := make([]int, (end-start)/step+1)
+			i := 0
+			for start <= end {
+				loop[i] = start
+				start += step
+				i++
+			}
+			return loop
+		},
 	})
 	tpl, err := tpl.ParseFiles(tplFile)
 	if err != nil {
