@@ -2,13 +2,14 @@ package exc
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 	"time"
-	"unsafe"
+
+	cr "github.com/fatih/color"
+	"github.com/toukii/goutils"
 )
 
 type CMD struct {
@@ -43,7 +44,7 @@ func (c *CMD) Debug() *CMD {
 
 func (c *CMD) Cd(dir string) *CMD {
 	err := os.Chdir(dir)
-	if Checkerr(err) {
+	if goutils.CheckNoLogErr(err) {
 		panic(err)
 	}
 	return c
@@ -55,8 +56,8 @@ func (c *CMD) Env(key string) *CMD {
 
 func (c *CMD) Wd() *CMD {
 	dir, err := os.Getwd()
-	if !Checkerr(err) {
-		fmt.Printf("=======[ %s ]======\n", dir)
+	if !goutils.CheckNoLogErr(err) {
+		cr.Black("=======[ %s ]======\n", dir)
 	}
 	return c
 }
@@ -76,10 +77,10 @@ func (c *CMD) Reset(cmd string) *CMD {
 
 func (c *CMD) DoNoTime() ([]byte, error) {
 	if c.debug {
-		fmt.Printf("\n## cmd:\n%s", c.raw)
+		cr.Magenta("\n## cmd:\n%s", c.raw)
 	}
 	if len(c.raw) <= 0 {
-		return nil, fmt.Errorf("raw cmd is nil")
+		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
 	}
 	if c.Execution != nil {
 		return c.Execution(c.cmd, c.args...)
@@ -89,10 +90,10 @@ func (c *CMD) DoNoTime() ([]byte, error) {
 
 func (c *CMD) Do() ([]byte, error) {
 	if c.debug {
-		fmt.Printf("\n## cmd:\n%s", c.raw)
+		fmt.Println(c.raw)
 	}
 	if len(c.raw) <= 0 {
-		return nil, fmt.Errorf("raw cmd is nil")
+		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
 	}
 	var err error
 	if c.Execution != nil {
@@ -108,9 +109,9 @@ func (c *CMD) Do() ([]byte, error) {
 		}()
 		select {
 		case <-sh:
-			Checkerr(err)
+			goutils.CheckNoLogErr(err)
 			if c.debug {
-				fmt.Println(*(*string)(unsafe.Pointer(&bs)))
+				fmt.Println(goutils.ToString(bs))
 			}
 			return bs, err
 		case <-time.After(8e9):
@@ -120,13 +121,47 @@ func (c *CMD) Do() ([]byte, error) {
 	return nil, err
 }
 
+func (c *CMD) DoTimeout(dur time.Duration) ([]byte, error) {
+	if c.debug {
+		fmt.Println(c.raw)
+	}
+	if len(c.raw) <= 0 {
+		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
+	}
+	var err error
+	if c.Execution != nil {
+		var bs []byte
+		sh := make(chan bool)
+		go func() {
+			go func() {
+				<-time.After(dur)
+				runtime.Goexit()
+			}()
+			bs, err = c.Execution(c.cmd, c.args...)
+			sh <- true
+		}()
+		select {
+		case <-sh:
+			goutils.CheckNoLogErr(err)
+			if c.debug {
+				fmt.Println(goutils.ToString(bs))
+			}
+			return bs, err
+		case <-time.After(dur):
+			err = fmt.Errorf("Timeout")
+		}
+	}
+	return nil, err
+}
+
 func (c *CMD) Execute() *CMD {
 	bs, err := c.DoNoTime()
 	if err != nil {
-		fmt.Println("\n## execute err:", err)
+		cr.Red("[ERROR] ")
+		fmt.Println(err)
 	}
 	if c.debug {
-		fmt.Printf("\n## execute output:\n%s", *(*string)(unsafe.Pointer(&bs)))
+		cr.Magenta("\n## execute output:\n%s", goutils.ToString(bs))
 	}
 	return c
 }
@@ -159,7 +194,7 @@ func (c *CMD) Tmp(cmd string) *CMD {
 		excmd = exec.Command(cmd)
 	}
 	bs, _ := excmd.CombinedOutput()
-	fmt.Println(*(*string)(unsafe.Pointer(&bs)))
+	fmt.Println(goutils.ToString(bs))
 	return c
 }
 
@@ -175,12 +210,4 @@ func DefaultExecution(cmd string, args ...string) ([]byte, error) {
 
 func BashExecution(bash string, args ...string) ([]byte, error) {
 	return exec.Command("bash", "-c", bash).CombinedOutput()
-}
-
-func Checkerr(err error) bool {
-	if err != nil {
-		log.Println(err)
-		return true
-	}
-	return false
 }
