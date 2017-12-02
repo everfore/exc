@@ -20,6 +20,10 @@ type CMD struct {
 	Execution func(cmd string, args ...string) ([]byte, error)
 }
 
+var (
+	cmdfmt = cr.New(cr.FgCyan, cr.Bold, cr.BgYellow)
+)
+
 func NewCMD(cmd string) *CMD {
 	newCMD := &CMD{raw: cmd, Execution: DefaultExecution}
 	args := strings.Split(cmd, " ")
@@ -57,7 +61,7 @@ func (c *CMD) Env(key string) *CMD {
 func (c *CMD) Wd() *CMD {
 	dir, err := os.Getwd()
 	if !goutils.CheckNoLogErr(err) {
-		cr.Black("=======[ %s ]======\n", dir)
+		cr.Cyan("= = = [ %s ] = = =\n", dir)
 	}
 	return c
 }
@@ -77,7 +81,7 @@ func (c *CMD) Reset(cmd string) *CMD {
 
 func (c *CMD) DoNoTime() ([]byte, error) {
 	if c.debug {
-		cr.Magenta("\n## cmd:\n%s", c.raw)
+		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
@@ -90,7 +94,7 @@ func (c *CMD) DoNoTime() ([]byte, error) {
 
 func (c *CMD) Do() ([]byte, error) {
 	if c.debug {
-		fmt.Println(c.raw)
+		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
@@ -123,7 +127,7 @@ func (c *CMD) Do() ([]byte, error) {
 
 func (c *CMD) DoTimeout(dur time.Duration) ([]byte, error) {
 	if c.debug {
-		fmt.Println(c.raw)
+		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
@@ -157,11 +161,11 @@ func (c *CMD) DoTimeout(dur time.Duration) ([]byte, error) {
 func (c *CMD) Execute() *CMD {
 	bs, err := c.DoNoTime()
 	if err != nil {
-		cr.Red("[ERROR] ")
-		fmt.Println(err)
+		cr.Red(err.Error())
 	}
 	if c.debug {
-		cr.Magenta("\n## execute output:\n%s", goutils.ToString(bs))
+		fmt.Print("## execute output: ")
+		cr.Magenta("%s", goutils.ToString(bs))
 	}
 	return c
 }
