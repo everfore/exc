@@ -163,7 +163,7 @@ func (c *CMD) Execute() *CMD {
 	if err != nil {
 		cr.Red(err.Error())
 	}
-	if c.debug {
+	if c.debug && len(bs) > 0 {
 		fmt.Print("## execute output: ")
 		cr.Magenta("%s", goutils.ToString(bs))
 	}
