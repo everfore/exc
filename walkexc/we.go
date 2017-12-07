@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/toukii/goutils"
 )
 
 var (
@@ -46,7 +48,6 @@ func SetCmd(c ...string) *exec.Cmd {
 }
 
 func DefaultCond(path string, info os.FileInfo) (ifExec bool, skip error) {
-	fmt.Println(info)
 	if strings.EqualFold(info.Name(), ".git") {
 		return false, filepath.SkipDir
 	}
@@ -77,13 +78,14 @@ func WalkExc(path string, info os.FileInfo, err error) error {
 
 func PathExc(path string, c ...string) error {
 	abs, _ := filepath.Abs(path)
-	fmt.Println("cur path:", abs, c)
 	cmd := SetCmd(c...)
 	cmd.Dir = abs
 	bs, err := cmd.Output()
-	fmt.Println(string(bs), err)
-	// bs, _ := cmd.CombinedOutput()
-	// fmt.Println(string(bs))
-	// cmd.CombinedOutput()
+	if goutils.CheckNoLogErr(err) {
+		return err
+	}
+	if len(bs) > 0 {
+		fmt.Printf("%s\n", bs)
+	}
 	return nil
 }
