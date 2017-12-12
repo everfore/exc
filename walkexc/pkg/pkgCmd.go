@@ -10,7 +10,7 @@ import (
 	"github.com/toukii/goutils"
 )
 
-var PkgCmd = &cobra.Command{
+var Command = &cobra.Command{
 	Use:   "pkg",
 	Short: "go import/dependency packages",
 	Long:  ``,
@@ -20,14 +20,14 @@ var PkgCmd = &cobra.Command{
 }
 
 func init() {
-	PkgCmd.PersistentFlags().BoolP("import", "i", true, "display import pkgs")
-	PkgCmd.PersistentFlags().BoolP("dep", "d", false, "display dependency pkgs")
-	PkgCmd.PersistentFlags().BoolP("error", "e", true, "display error pkgs")
-	PkgCmd.PersistentFlags().BoolP("install", "I", false, "install error pkgs")
-	viper.BindPFlag("import", PkgCmd.PersistentFlags().Lookup("import"))
-	viper.BindPFlag("dep", PkgCmd.PersistentFlags().Lookup("dep"))
-	viper.BindPFlag("error", PkgCmd.PersistentFlags().Lookup("error"))
-	viper.BindPFlag("install", PkgCmd.PersistentFlags().Lookup("install"))
+	Command.PersistentFlags().BoolP("import", "i", true, "display import pkgs")
+	Command.PersistentFlags().BoolP("dep", "d", false, "display dependency pkgs")
+	Command.PersistentFlags().BoolP("error", "e", true, "display error pkgs")
+	Command.PersistentFlags().BoolP("install", "I", false, "install error pkgs")
+	viper.BindPFlag("import", Command.PersistentFlags().Lookup("import"))
+	viper.BindPFlag("dep", Command.PersistentFlags().Lookup("dep"))
+	viper.BindPFlag("error", Command.PersistentFlags().Lookup("error"))
+	viper.BindPFlag("install", Command.PersistentFlags().Lookup("install"))
 }
 
 func Excute() error {
