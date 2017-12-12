@@ -25,8 +25,10 @@ var Command = &cobra.Command{
 }
 
 func init() {
-	Command.PersistentFlags().BoolP("execute", "E", false, "excute the render result by bash")
+	Command.PersistentFlags().BoolP("execute", "e", false, "excute the render result by bash")
 	viper.BindPFlag("execute", Command.PersistentFlags().Lookup("execute"))
+
+	Command.AddCommand(InitCommand)
 }
 
 func Excute(args []string) error {
@@ -44,12 +46,11 @@ func Excute(args []string) error {
 		viper.Set("tpl", newArgs[0])
 		viper.Set("data", newArgs[1])
 	} else {
-		viper.Set("tpl", "s2b.tpl")
+		viper.Set("tpl", "tpl.tpl")
 		viper.Set("data", "data.yaml")
 	}
 
-	excute(viper.GetString("tpl"), viper.GetString("data"), viper.GetBool("execute"))
-	return nil
+	return excute(viper.GetString("tpl"), viper.GetString("data"), viper.GetBool("execute"))
 }
 
 // Data tpl data
@@ -58,43 +59,35 @@ type Data struct {
 	Arr []interface{}          `yaml:"arr"`
 }
 
-// Test
-func Test(arg int) string {
-	return fmt.Sprintf("TEST call %d", arg)
-}
-
-func excute(tplFile string, dataFile string, excute bool) {
+func excute(tplFile string, dataFile string, excute bool) error {
 	if tplFile == "" {
-		fmt.Println("template file is nil.")
-		os.Exit(-1)
+		return fmt.Errorf("template file is nil.")
 	}
 
 	dfbs := goutils.ReadFile(dataFile)
 	var data Data
 	err := yaml.Unmarshal(dfbs, &data)
-	if goutils.LogCheckErr(err) {
-		os.Exit(-1)
+	if goutils.CheckNoLogErr(err) {
+		return err
 	}
 
 	if excute {
 		buf := make([]byte, 20, 10240)
 		wr := qiniubytes.NewWriter(buf)
 		err := Render(wr, tplFile, data)
-		if goutils.LogCheckErr(err) {
-			os.Exit(-1)
+		if goutils.CheckNoLogErr(err) {
+			return err
 		}
 		exc.Bash(goutils.ToString(wr.Bytes())).Debug().Execute()
 	} else {
-		goutils.LogCheckErr(Render(os.Stdout, tplFile, data))
+		return Render(os.Stdout, tplFile, data)
 	}
+	return nil
 }
 
 // Render
 func Render(wr io.Writer, tplFile string, data interface{}) error {
 	tpl := template.New(tplFile).Funcs(template.FuncMap{
-		"test": func(arg int) string {
-			return fmt.Sprintf("TEST call %d", arg)
-		},
 		"join": func(ids []interface{}, sep string) string {
 			idsStr := make([]string, len(ids))
 			for i, id := range ids {
@@ -117,7 +110,7 @@ func Render(wr io.Writer, tplFile string, data interface{}) error {
 		},
 	})
 	tpl, err := tpl.Parse(goutils.ToString(goutils.ReadFile(tplFile)))
-	if err != nil {
+	if goutils.CheckNoLogErr(err) {
 		return err
 	}
 
