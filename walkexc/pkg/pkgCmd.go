@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/toukii/goutils"
+	"github.com/toukii/pull/command"
 )
 
 var Command = &cobra.Command{
@@ -35,8 +36,8 @@ var excuted map[string]bool
 func init() {
 	Command.PersistentFlags().BoolP("import", "i", true, "display import pkgs")
 	Command.PersistentFlags().BoolP("dep", "d", false, "display dependency pkgs")
-	Command.PersistentFlags().BoolP("error", "e", true, "display error pkgs")
-	Command.PersistentFlags().BoolP("install", "I", false, "install error pkgs")
+	Command.PersistentFlags().BoolP("error", "e", false, "display error pkgs")
+	Command.PersistentFlags().BoolP("install", "I", true, "install error pkgs")
 	Command.PersistentFlags().BoolP("R-repeat", "R", false, "R-repeat")
 	viper.BindPFlag("import", Command.PersistentFlags().Lookup("import"))
 	viper.BindPFlag("dep", Command.PersistentFlags().Lookup("dep"))
@@ -85,30 +86,42 @@ func Excute(repo string) error {
 
 	path := gopkg.ImportPath
 
-	fmt.Printf("gopkg: [%s]\n", cr.HiCyanString(path))
-	if viper.GetBool("dep") {
-		indent, ok := gopkg.DepPkgsIndent()
-		if ok {
-			fmt.Printf("  %s:\n%s", cr.CyanString("dep gopkgs"), indent)
-		}
-	} else if viper.GetBool("import") {
-		indent, ok := gopkg.ImportPkgsIndent()
-		if ok {
-			fmt.Printf("  %s:\n%s", cr.CyanString("import gopkgs"), indent)
-		}
-	}
-
+	fmt.Printf("[%s]", cr.HiCyanString(path))
 	if viper.GetBool("error") {
 		indent, ok := gopkg.ErrPkgsIndent()
 		if ok {
 			fmt.Printf("  %s:\n%s", cr.CyanString("err dep gopkgs"), indent)
 		}
+	} else {
+		if viper.GetBool("dep") {
+			indent, ok := gopkg.DepPkgsIndent()
+			if ok {
+				fmt.Printf("  %s:\n%s", cr.CyanString("dep gopkgs"), indent)
+			}
+		} else if viper.GetBool("import") {
+			indent, ok := gopkg.ImportPkgsIndent()
+			if ok {
+				fmt.Printf("  %s:\n%s", cr.CyanString("import gopkgs"), indent)
+			}
+		}
 	}
 
 	if viper.GetBool("install") {
+		size := len(gopkg.NoStdDepErrPkgs)
+		pkgs := make([]string, 0, size)
 		for _, pkg := range gopkg.NoStdDepErrPkgs {
-			exc.NewCMD(fmt.Sprintf("pull %s", pkg.PkgName)).Debug().DoTimeout(20e9)
+			pkgs = append(pkgs, pkg.PkgName)
+		}
+		if size > 0 {
+			command.Excute(pkgs)
 		}
 	}
+
+	// if viper.GetBool("install") {
+	// 	for _, pkg := range gopkg.NoStdDepErrPkgs {
+	// 		exc.NewCMD(fmt.Sprintf("pull %s", pkg.PkgName)).Debug().DoTimeout(20e9)
+	// 	}
+	// }
+	fmt.Println()
 	return nil
 }

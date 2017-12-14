@@ -102,10 +102,15 @@ func (p *Pkg) analyseDepsErrors() []*NoStdDepErrPkg {
 	return ret
 }
 
-func (p *Pkg) ErrPkgsIndent() (indent string, output bool) {
-	for i, name := range p.NoStdDepErrPkgs {
+func (p *Pkg) ErrPkgsIndent() (string, bool) {
+	return p.errPkgsIndent(1)
+}
+
+func (p *Pkg) errPkgsIndent(idx int) (indent string, output bool) {
+	for _, name := range p.NoStdDepErrPkgs {
 		output = true
-		indent += fmt.Sprintf("\t%s. %s\n", cr.HiCyanString("%d", i+1), name)
+		indent += fmt.Sprintf("\t%s. %s\n", cr.HiCyanString("%d", idx), name)
+		idx++
 	}
 	return
 }
@@ -119,13 +124,23 @@ func (p *Pkg) ImportPkgsIndent() (indent string, output bool) {
 			idx++
 		}
 	}
+
+	if errIndent, errOutput := p.errPkgsIndent(idx); errOutput {
+		indent += errIndent
+	}
 	return
 }
 
 func (p *Pkg) DepPkgsIndent() (indent string, output bool) {
-	for i, name := range p.NoStdDepOKPkgs {
+	idx := 1
+	for _, name := range p.NoStdDepOKPkgs {
 		output = true
-		indent += fmt.Sprintf("\t%s. %s\n", cr.HiCyanString("%d", i+1), cr.HiGreenString(name))
+		indent += fmt.Sprintf("\t%s. %s\n", cr.HiCyanString("%d", idx), cr.HiGreenString(name))
+		idx++
+	}
+
+	if errIndent, errOutput := p.errPkgsIndent(idx); errOutput {
+		indent += errIndent
 	}
 	return
 }
