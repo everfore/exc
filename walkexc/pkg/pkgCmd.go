@@ -37,8 +37,8 @@ func init() {
 	Command.PersistentFlags().BoolP("import", "i", true, "display import pkgs")
 	Command.PersistentFlags().BoolP("dep", "d", false, "display dependency pkgs")
 	Command.PersistentFlags().BoolP("error", "e", false, "display error pkgs")
-	Command.PersistentFlags().BoolP("pull", "p", true, "pull error pkgs")
-	Command.PersistentFlags().BoolP("build", "b", false, "build pkgs")
+	Command.PersistentFlags().BoolP("pull", "P", true, "pull error pkgs")
+	Command.PersistentFlags().BoolP("build", "B", true, "build pkgs")
 	Command.PersistentFlags().BoolP("install", "I", false, "install pkgs")
 	Command.PersistentFlags().BoolP("R-repeat", "R", false, "R-repeat")
 	viper.BindPFlag("import", Command.PersistentFlags().Lookup("import"))
@@ -69,7 +69,8 @@ func Cond(path string, info os.FileInfo) (ifExec bool, skip error) {
 			return false, nil
 		}
 		excuted[absBase] = true
-		Excute(TrimGopath(absBase))
+		paths := strings.Split(path, info.Name())
+		Excute(TrimGopath(absBase), paths[0])
 		return false, nil
 	} else {
 		if !viper.GetBool("R-repeat") {
@@ -81,7 +82,10 @@ func Cond(path string, info os.FileInfo) (ifExec bool, skip error) {
 	return false, nil
 }
 
-func Excute(repo string) error {
+func Excute(repo, relpath string) error {
+	if relpath == "" {
+		relpath = "."
+	}
 	bs, err := exc.NewCMD("go list -json " + repo).DoNoTime()
 	gopkg, err := NewPkg(bs)
 	if goutils.CheckErr(err) {
@@ -121,17 +125,12 @@ func Excute(repo string) error {
 		}
 	}
 
-	if viper.GetBool("build") {
-		exc.NewCMD("go build").Debug().DoNoTime()
-	} else if viper.GetBool("install") {
-		exc.NewCMD("go install").Debug().DoNoTime()
+	if viper.GetBool("install") {
+		exc.NewCMD("go install").Cd(relpath).Execute()
+	} else if viper.GetBool("build") {
+		exc.NewCMD("go build").Cd(relpath).Execute()
 	}
 
-	// if viper.GetBool("pull") {
-	// 	for _, pkg := range gopkg.NoStdDepErrPkgs {
-	// 		exc.NewCMD(fmt.Sprintf("pull %s", pkg.PkgName)).Debug().DoTimeout(20e9)
-	// 	}
-	// }
 	fmt.Println()
 	return nil
 }
