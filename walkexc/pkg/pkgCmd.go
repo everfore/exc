@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/toukii/goutils"
-	"github.com/toukii/pull/command"
+	pull "github.com/toukii/pull/command"
 )
 
 var Command = &cobra.Command{
@@ -113,7 +113,7 @@ func Excute(repo string) error {
 			pkgs = append(pkgs, pkg.PkgName)
 		}
 		if size > 0 {
-			command.Excute(pkgs)
+			pull.Excute(pkgs)
 		}
 	}
 

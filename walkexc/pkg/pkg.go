@@ -49,8 +49,8 @@ func (ep *NoStdDepErrPkg) String() string {
 func NewPkg(bs []byte) (*Pkg, error) {
 	var pkg Pkg
 	err := json.Unmarshal(bs, &pkg)
-	if goutils.CheckErr(err) {
-		return nil, err
+	if goutils.CheckNoLogErr(err) {
+		return nil, fmt.Errorf("%s", bs)
 	}
 	pkg.analyse()
 	return &pkg, err
