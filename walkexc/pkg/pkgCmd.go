@@ -37,11 +37,15 @@ func init() {
 	Command.PersistentFlags().BoolP("import", "i", true, "display import pkgs")
 	Command.PersistentFlags().BoolP("dep", "d", false, "display dependency pkgs")
 	Command.PersistentFlags().BoolP("error", "e", false, "display error pkgs")
-	Command.PersistentFlags().BoolP("install", "I", true, "install error pkgs")
+	Command.PersistentFlags().BoolP("pull", "p", true, "pull error pkgs")
+	Command.PersistentFlags().BoolP("build", "b", false, "build pkgs")
+	Command.PersistentFlags().BoolP("install", "I", false, "install pkgs")
 	Command.PersistentFlags().BoolP("R-repeat", "R", false, "R-repeat")
 	viper.BindPFlag("import", Command.PersistentFlags().Lookup("import"))
 	viper.BindPFlag("dep", Command.PersistentFlags().Lookup("dep"))
 	viper.BindPFlag("error", Command.PersistentFlags().Lookup("error"))
+	viper.BindPFlag("pull", Command.PersistentFlags().Lookup("pull"))
+	viper.BindPFlag("build", Command.PersistentFlags().Lookup("build"))
 	viper.BindPFlag("install", Command.PersistentFlags().Lookup("install"))
 	viper.BindPFlag("R-repeat", Command.PersistentFlags().Lookup("R-repeat"))
 	excuted = make(map[string]bool)
@@ -106,7 +110,7 @@ func Excute(repo string) error {
 		}
 	}
 
-	if viper.GetBool("install") {
+	if viper.GetBool("pull") {
 		size := len(gopkg.NoStdDepErrPkgs)
 		pkgs := make([]string, 0, size)
 		for _, pkg := range gopkg.NoStdDepErrPkgs {
@@ -117,7 +121,13 @@ func Excute(repo string) error {
 		}
 	}
 
-	// if viper.GetBool("install") {
+	if viper.GetBool("build") {
+		exc.NewCMD("go build").Debug().DoNoTime()
+	} else if viper.GetBool("install") {
+		exc.NewCMD("go install").Debug().DoNoTime()
+	}
+
+	// if viper.GetBool("pull") {
 	// 	for _, pkg := range gopkg.NoStdDepErrPkgs {
 	// 		exc.NewCMD(fmt.Sprintf("pull %s", pkg.PkgName)).Debug().DoTimeout(20e9)
 	// 	}

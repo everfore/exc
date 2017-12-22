@@ -13,11 +13,12 @@ import (
 )
 
 type CMD struct {
-	raw       string
-	cmd       string
-	args      []string
-	debug     bool
-	Execution func(cmd string, args ...string) ([]byte, error)
+	originPath string
+	raw        string
+	cmd        string
+	args       []string
+	debug      bool
+	Execution  func(cmd string, args ...string) ([]byte, error)
 }
 
 var (
@@ -34,6 +35,8 @@ func NewCMD(cmd string) *CMD {
 	} else {
 		newCMD.cmd = cmd
 	}
+
+	newCMD.originPath = originPath()
 	return newCMD
 }
 
@@ -44,6 +47,16 @@ func Bash(cmd string) *CMD {
 func (c *CMD) Debug() *CMD {
 	c.debug = !c.debug
 	return c
+}
+
+func (c *CMD) deferFunc() {
+	c.Cd(c.originPath)
+}
+
+func originPath() string {
+	dir, err := os.Getwd()
+	goutils.LogCheckErr(err)
+	return dir
 }
 
 func (c *CMD) Cd(dir string) *CMD {
@@ -59,10 +72,7 @@ func (c *CMD) Env(key string) *CMD {
 }
 
 func (c *CMD) Wd() *CMD {
-	dir, err := os.Getwd()
-	if !goutils.CheckNoLogErr(err) {
-		cr.Cyan("= = = [ %s ] = = =\n", dir)
-	}
+	cr.Cyan("= = = [ %s ] = = =\n", originPath())
 	return c
 }
 
@@ -80,6 +90,7 @@ func (c *CMD) Reset(cmd string) *CMD {
 }
 
 func (c *CMD) DoNoTime() ([]byte, error) {
+	defer c.deferFunc()
 	if c.debug {
 		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
 	}
@@ -93,6 +104,7 @@ func (c *CMD) DoNoTime() ([]byte, error) {
 }
 
 func (c *CMD) Do() ([]byte, error) {
+	defer c.deferFunc()
 	if c.debug {
 		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
 	}
@@ -126,6 +138,7 @@ func (c *CMD) Do() ([]byte, error) {
 }
 
 func (c *CMD) DoTimeout(dur time.Duration) ([]byte, error) {
+	defer c.deferFunc()
 	if c.debug {
 		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
 	}
