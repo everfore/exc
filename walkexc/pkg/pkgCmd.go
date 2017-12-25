@@ -126,9 +126,15 @@ func Excute(repo, relpath string) error {
 	}
 
 	if viper.GetBool("install") {
-		exc.NewCMD("go install").Cd(relpath).Execute()
+		bs, _ := exc.NewCMD("go install").Cd(relpath).DoNoTime()
+		if len(bs) > 0 {
+			cr.Red("%s", bs)
+		}
 	} else if viper.GetBool("build") {
-		exc.NewCMD("go build").Cd(relpath).Execute()
+		bs, _ := exc.NewCMD("go build").Cd(relpath).DoNoTime()
+		if len(bs) > 0 {
+			cr.Red("%s", bs)
+		}
 	}
 
 	fmt.Println()
