@@ -50,7 +50,13 @@ func (c *CMD) Debug() *CMD {
 }
 
 func (c *CMD) deferFunc() {
-	c.Cd(c.originPath)
+	if c.originPath != "" {
+		c.Cd(c.originPath)
+	}
+}
+
+func (c *CMD) Set(cmd string) {
+	c.raw, c.cmd, c.Execution = cmd, cmd, DefaultExecution
 }
 
 func originPath() string {
