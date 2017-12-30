@@ -22,7 +22,7 @@ type CMD struct {
 }
 
 var (
-	cmdfmt = cr.New(cr.FgCyan, cr.Bold, cr.BgYellow)
+	cmdfmt = cr.New(cr.FgHiGreen, cr.Bold, cr.BgHiBlack)
 )
 
 func NewCMD(cmd string) *CMD {
@@ -98,7 +98,8 @@ func (c *CMD) Reset(cmd string) *CMD {
 func (c *CMD) DoNoTime() ([]byte, error) {
 	defer c.deferFunc()
 	if c.debug {
-		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
+		cmdfmt.Print(c.raw)
+		fmt.Println()
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
@@ -112,7 +113,8 @@ func (c *CMD) DoNoTime() ([]byte, error) {
 func (c *CMD) Do() ([]byte, error) {
 	defer c.deferFunc()
 	if c.debug {
-		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
+		cmdfmt.Print(c.raw)
+		fmt.Println()
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
@@ -146,7 +148,8 @@ func (c *CMD) Do() ([]byte, error) {
 func (c *CMD) DoTimeout(dur time.Duration) ([]byte, error) {
 	defer c.deferFunc()
 	if c.debug {
-		fmt.Printf("## cmd: %s\n", cmdfmt.Sprint(c.raw))
+		cmdfmt.Print(c.raw)
+		fmt.Println()
 	}
 	if len(c.raw) <= 0 {
 		return nil, fmt.Errorf(cr.RedString("raw cmd is nil"))
@@ -183,7 +186,6 @@ func (c *CMD) Execute() *CMD {
 		cr.Red(err.Error())
 	}
 	if c.debug && len(bs) > 0 {
-		fmt.Print("## execute output: ")
 		cr.Magenta("%s", goutils.ToString(bs))
 	}
 	return c
