@@ -44,7 +44,11 @@ func Bash(cmd string) *CMD {
 	return &CMD{raw: cmd, cmd: cmd, Execution: BashExecution}
 }
 
-func (c *CMD) Debug() *CMD {
+func (c *CMD) Debug(debug ...bool) *CMD {
+	if len(debug) > 0 {
+		c.debug = debug[0]
+		return c
+	}
 	c.debug = !c.debug
 	return c
 }
