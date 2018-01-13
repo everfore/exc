@@ -59,7 +59,11 @@ func NewPkg(bs []byte) (*Pkg, error) {
 func (p *Pkg) analyse() {
 	p.NoStdDepErrPkgs = p.analyseDepsErrors()
 
-	p.NoStdImportOKPkgs = make([]string, 0, len(p.Imports)-len(p.DepsErrors))
+	size := len(p.Imports) - len(p.DepsErrors)
+	if size <= 0 {
+		return
+	}
+	p.NoStdImportOKPkgs = make([]string, 0, size)
 	for _, imps := range p.Imports {
 		if p.nostdDepErrPkgMap[imps] || !GithubPkgFilter(imps) {
 			continue
