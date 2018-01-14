@@ -25,6 +25,10 @@ var (
 	cmdfmt = cr.New(cr.FgHiGreen, cr.Bold, cr.BgHiBlack)
 )
 
+func NewCMDf(format string, args ...interface{}) *CMD {
+	return NewCMD(fmt.Sprintf(format, args...))
+}
+
 func NewCMD(cmd string) *CMD {
 	newCMD := &CMD{raw: cmd, Execution: DefaultExecution}
 	args := strings.Split(cmd, " ")
