@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/everfore/exc"
 	"github.com/everfore/exc/walkexc"
@@ -115,13 +116,14 @@ func Excute(repo, relpath string) error {
 	}
 
 	if viper.GetBool("pull") {
-		size := len(gopkg.NoStdDepErrPkgs)
-		pkgs := make([]string, 0, size)
+		var wg sync.WaitGroup
 		for _, pkg := range gopkg.NoStdDepErrPkgs {
-			pkgs = append(pkgs, pkg.PkgName)
-		}
-		if size > 0 {
-			pull.Excute(pkgs)
+			wg.Add(1)
+			go func(pkgname string) {
+				pull.Excute([]string{pkgname})
+				wg.Done()
+			}(pkg.PkgName)
+			wg.Done()
 		}
 	}
 

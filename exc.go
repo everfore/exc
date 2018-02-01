@@ -199,6 +199,17 @@ func (c *CMD) Execute() *CMD {
 	return c
 }
 
+func (c *CMD) Exec(debug bool) *CMD {
+	bs, err := c.DoNoTime()
+	if err != nil {
+		cr.Red(err.Error())
+	}
+	if debug && len(bs) > 0 {
+		cr.Magenta("%s", goutils.ToString(bs))
+	}
+	return c
+}
+
 func (c *CMD) ExecuteAfter(sec int) *CMD {
 	<-time.After(time.Second * (time.Duration)(sec))
 	c.Do()
