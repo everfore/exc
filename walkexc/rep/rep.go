@@ -36,7 +36,7 @@ func init() {
 	Command.PersistentFlags().StringP("dir", "p", ".", "the root dir of replace files")
 	Command.PersistentFlags().StringP("skip", "s", ".git", "skip dir")
 	Command.PersistentFlags().BoolP("repeat", "r", false, "repeat to execute")
-	Command.PersistentFlags().StringP("extension", "e", ".go", "file extension, ex: .go ; Dockerfilw")
+	Command.PersistentFlags().StringP("extension", "e", "", "file extension, ex: .go ; Dockerfilw")
 	Command.PersistentFlags().StringP("old", "o", "", "old content")
 	Command.PersistentFlags().StringP("new", "n", "", "new content")
 	viper.BindPFlag("dir", Command.PersistentFlags().Lookup("dir"))
