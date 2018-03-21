@@ -13,17 +13,14 @@ import (
 )
 
 var (
-	count = 0
-	mc    map[string]int
+	count     = 0
+	fileCount = 0
+	mc        map[string]int
 )
 
 func init() {
 	mc = make(map[string]int)
-	mc[".java"] = 0
-	mc[".js"] = 0
-	mc[".jsp"] = 0
-	mc[".html"] = 0
-	mc[".properties"] = 0
+	mc[".go"] = 0
 }
 
 func main() {
@@ -34,21 +31,24 @@ func main() {
 }
 
 func Cond(path1 string, info os.FileInfo) (ifExec bool, skip error) {
-	if strings.HasPrefix(info.Name(), ".g") || strings.HasPrefix(info.Name(), ".s") || strings.HasPrefix(info.Name(), ".e") || strings.HasPrefix(info.Name(), "target") || strings.HasPrefix(info.Name(), "jquery") || strings.HasPrefix(info.Name(), "angular") || strings.HasSuffix(info.Name(), "min.js") {
-		return false, filepath.SkipDir
+	if strings.Contains(path1, ".git/") || strings.Contains(path1, "vendor/") ||
+		strings.HasPrefix(info.Name(), "gen.") || strings.HasPrefix(info.Name(), "gen_") || strings.HasSuffix(info.Name(), ".pb.go") {
+		// fmt.Println("skip", path1, info.Name())
+		// return false, filepath.SkipDir
+		return false, nil
 	}
-	if info.IsDir() && (strings.HasPrefix(info.Name(), "test") || strings.HasPrefix(info.Name(), "echarts") || strings.HasPrefix(info.Name(), "bootstrap") || strings.HasPrefix(info.Name(), "uikit") || strings.HasPrefix(info.Name(), "easyui") || strings.HasPrefix(info.Name(), "validate") || strings.HasPrefix(info.Name(), "highchart") || strings.HasPrefix(info.Name(), "textAngular") || strings.HasPrefix(info.Name(), "vendor")) {
-		return false, filepath.SkipDir
-	}
+	// if info.IsDir() {
+	// fmt.Println(path1, info.Name())
+	// }
 	fileSuffix := path.Ext(info.Name())
 	if !info.IsDir() {
-		if strings.Contains(".go.java.js.jsp.html.xml.properties", fileSuffix) {
-			// if strings.Contains(".go.java", fileSuffix) {
-			// if strings.Contains(".go.jsp", fileSuffix) {
-			// if strings.Contains(".go.js", fileSuffix) {
+		if ".go" == fileSuffix {
 			ct := Wcl(path1)
 			mc[fileSuffix] += ct
 			count += ct
+			fileCount++
+			fmt.Printf("%d ", fileCount)
+			// fmt.Printf("[count]%s %s:%d\n", path1, info.Name(), ct)
 			return true, nil
 		}
 	}
@@ -77,7 +77,7 @@ func Wcl(filaname string) int {
 		}
 		ct++
 	}
-	fmt.Printf("%s:%d\n", abs_path, ct)
+	// fmt.Printf("%s:%d\n", abs_path, ct)
 	return ct
 }
 
