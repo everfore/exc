@@ -55,8 +55,9 @@ func Excute(args []string) error {
 
 // Data tpl data
 type Data struct {
-	Map map[string]interface{} `yaml:"map"`
-	Arr []interface{}          `yaml:"arr"`
+	Map  map[string]interface{} `yaml:"map"`
+	Arr  []interface{}          `yaml:"arr"`
+	Step int
 }
 
 func excute(tplFile string, dataFile string, excute bool) error {
@@ -74,11 +75,43 @@ func excute(tplFile string, dataFile string, excute bool) error {
 	if excute {
 		buf := make([]byte, 20, 10240)
 		wr := qiniubytes.NewWriter(buf)
-		err := Render(wr, tplFile, data)
-		if goutils.CheckNoLogErr(err) {
-			return err
+
+		if data.Step > 0 {
+			size := len(data.Arr)
+			N := data.Step
+			remainder := 0 // 没有没整除的部分
+			if size%N > 0 {
+				remainder = 1
+			}
+			loop := size/N + remainder // 总共切片切次
+			for i := 0; i < loop-1; i++ {
+				dt := &Data{
+					Map: data.Map,
+					Arr: data.Arr[i*N : (i+1)*N],
+				}
+				wr.Reset()
+				err := Render(wr, tplFile, dt)
+				if goutils.CheckNoLogErr(err) {
+					return err
+				}
+				exc.Bash(goutils.ToString(wr.Bytes())).Debug().Execute()
+			}
+			dt := &Data{
+				Map: data.Map,
+				Arr: data.Arr[(loop-1)*N:],
+			}
+			err := Render(wr, tplFile, dt)
+			if goutils.CheckNoLogErr(err) {
+				return err
+			}
+			exc.Bash(goutils.ToString(wr.Bytes())).Debug().Execute()
+		} else {
+			err := Render(wr, tplFile, data)
+			if goutils.CheckNoLogErr(err) {
+				return err
+			}
+			exc.Bash(goutils.ToString(wr.Bytes())).Debug().Execute()
 		}
-		exc.Bash(goutils.ToString(wr.Bytes())).Debug().Execute()
 	} else {
 		return Render(os.Stdout, tplFile, data)
 	}
