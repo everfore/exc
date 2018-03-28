@@ -33,13 +33,8 @@ func main() {
 func Cond(path1 string, info os.FileInfo) (ifExec bool, skip error) {
 	if strings.Contains(path1, ".git/") || strings.Contains(path1, "vendor/") ||
 		strings.HasPrefix(info.Name(), "gen.") || strings.HasPrefix(info.Name(), "gen_") || strings.HasSuffix(info.Name(), ".pb.go") {
-		// fmt.Println("skip", path1, info.Name())
-		// return false, filepath.SkipDir
 		return false, nil
 	}
-	// if info.IsDir() {
-	// fmt.Println(path1, info.Name())
-	// }
 	fileSuffix := path.Ext(info.Name())
 	if !info.IsDir() {
 		if ".go" == fileSuffix {
@@ -47,8 +42,7 @@ func Cond(path1 string, info os.FileInfo) (ifExec bool, skip error) {
 			mc[fileSuffix] += ct
 			count += ct
 			fileCount++
-			fmt.Printf("%d ", fileCount)
-			// fmt.Printf("[count]%s %s:%d\n", path1, info.Name(), ct)
+			// fmt.Printf("%d ", fileCount)
 			return true, nil
 		}
 	}
@@ -99,14 +93,4 @@ func ContentContains(path string, stuff string) ([]byte, bool) {
 		return bs, true
 	}
 	return nil, false
-}
-
-func OverWrite(path string, bs []byte) {
-	// wf, err := os.OpenFile(path, os.O_WRONLY, 0655)
-	// defer wf.Close()
-	// if goutils.CheckErr(err) {
-	// 	return
-	// }
-	err := ioutil.WriteFile(path, bs, 0655)
-	goutils.CheckErr(err)
 }
